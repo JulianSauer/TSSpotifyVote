@@ -1,7 +1,10 @@
+package plugin;
+
 public enum CredentialsHolder {
     IP(""),
     USERNAME(""),
-    PASSWORD("");
+    PASSWORD(""),
+    SPOTIFY_TOKEN("");
 
     private final String value;
 
