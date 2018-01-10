@@ -2,6 +2,7 @@ import com.github.theholywaffle.teamspeak3.TS3Api;
 import com.github.theholywaffle.teamspeak3.api.TextMessageTargetMode;
 import com.github.theholywaffle.teamspeak3.api.event.TS3EventAdapter;
 import com.github.theholywaffle.teamspeak3.api.event.TextMessageEvent;
+import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 
 import java.util.ArrayList;
 
@@ -13,12 +14,9 @@ public class VoteListener extends TS3EventAdapter {
     private int voteCounter;
     private int counterNext;
 
-    //TODO create class with arraylist to store users and votes to quickly check for votes and users
     /**
      * Stores votes of the users
      */
-    private ArrayList<String> VotedUsers;
-
     private UserVoteList table;
 
     VoteListener(TS3Api api) {
@@ -28,7 +26,6 @@ public class VoteListener extends TS3EventAdapter {
 
         api.registerAllEvents();
 
-        VotedUsers = new ArrayList<String>();  //deprecated
         table = new UserVoteList();
     }
 
@@ -57,21 +54,23 @@ public class VoteListener extends TS3EventAdapter {
 
                 if(message.equals("!list"))
                 {
-                    System.out.println("Got list");
-                    for(Object com:commands.listCommands())
-                        api.sendServerMessage(com + ": "+commands.getDefinition((String)com));      //TODO change to PM
+                    for(Object com:commands.listCommands()) {
+                        String output = com + ":\t\t" + commands.getDefinition((String) com);
+                        api.sendPrivateMessage(api.getClientsByName(user).get(0).getId(),output);
+                    }
                 }
                 else {
 
                     if (!table.contains(user, message))
                         table.add(user, message);
 
+                    int mansNotBot = 0;
+                   for (Client c:api.getClients()) {
+                       mansNotBot += !c.isServerQueryClient() ? 1 : 0;      //query clients don't count as men
+                   }
 
-                    int indexBotGroup = api.getClientsByName("Vote bot").get(0).getServerGroups()[0];       //Ansatz 1 um Bots nicht mitzuzählen.#
-                    int mansNotBot = api.getClients().size() - api.getServerGroupClients(indexBotGroup).size();
-                    api.getClientInfo(api.getClientsByName(user).get(0).getId()).isServerQueryClient();     //Ansatz 2 um Bots nicht mitzuzählen.
-
-                    if (table.size(message) > mansNotBot / 2) {         //vote successful (clear voteList?)
+                   api.sendServerMessage(table.size(message) +"/" + mansNotBot + " Users have voted for \"" + message  + "\"");
+                    if (table.size(message) > (int)(mansNotBot / 2)) {         //vote successful (clear voteList?)
                         botStuff(message);
                     }
                 }
@@ -80,7 +79,14 @@ public class VoteListener extends TS3EventAdapter {
     }
 
     private void botStuff(String command) {
+        //TODO implement spotify interface
         System.out.println("Processing: " +command);
+
+        switch(command) {
+            case "!next":
+                api.sendServerMessage("Playing that same song");
+            break;
+        }
     }
 
 }
