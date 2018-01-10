@@ -15,11 +15,15 @@ public class Main {
         final TS3Query query = new TS3Query(config);
         query.connect();
 
+        // TODO extend or replace CredentialHolder with Config file
+
+        Config conf=new Config();
+        System.out.println(conf.getProperty("IP"));     //DEBUG
+
         final TS3Api api = query.getApi();
         api.login(CredentialsHolder.USERNAME.toString(), CredentialsHolder.PASSWORD.toString());
         api.selectVirtualServerById(1);
         api.setNickname("Vote Bot");
- //       api.sendServerMessage("Vote for the next song by typing !next in chat");
 
         api.registerEvent(TS3EventType.TEXT_SERVER, -1);
         api.addTS3Listeners(new VoteListener(api));
