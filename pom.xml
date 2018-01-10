@@ -14,6 +14,11 @@
             <artifactId>teamspeak3-api</artifactId>
             <version>1.0.14</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -29,7 +34,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>Main</mainClass>
+                            <mainClass>plugin.Main</mainClass>
                         </configuration>
                     </execution>
                 </executions>
