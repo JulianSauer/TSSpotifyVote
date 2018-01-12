@@ -17,7 +17,7 @@ public class Main {
 
         // TODO extend or replace CredentialHolder with Config file
 
-        Config conf=new Config();
+        Config conf = new Config();
         System.out.println(conf.getProperty("IP"));     //DEBUG
 
         final TS3Api api = query.getApi();
