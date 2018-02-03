@@ -1,37 +1,39 @@
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class Config {
+    private static final Config conf = new Config();
 
-    private String filePath = "Credentials.cfg";
+    private String filePath = System.getProperty("user.dir") + File.separator + "Credentials.cfg";
 
     private Properties config;
 
     Config() {
         config = new Properties();
 
-        try {
-            config.load(this.getClass().getResourceAsStream(filePath));
-        } catch (Exception e) {
-            System.err.println("Could not find config file");
+        if ((new File(filePath)).exists()) {
+            try {
+                System.out.println("Trying to read file from \"" + filePath + "\"");
+                config.load(new FileInputStream(filePath));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            createConfig();
+            saveConfig();
         }
 
-        //TODO implement first use scenario, creating config file and informing user to edit it
-        //initial values needed for first use
-        config.setProperty("IP", "");
-        config.setProperty("USERNAME", "");
-        config.setProperty("PASSWORD", "");
-
-        SaveConfig();
     }
 
 
-    public void SaveConfig() {
+    public void saveConfig() {
         try {
             config.store(new FileOutputStream(filePath), null);
+            System.out.println("Saved config file under \"" + filePath + "\"");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -40,4 +42,24 @@ public class Config {
         return config.getProperty(key);
     }
 
+
+    public void createConfig() {
+
+        //initial values needed for first use
+        for (CredentialsHolder c : CredentialsHolder.values()) {
+            config.put(c.name(), c.toString());
+        }
+        config.put("EULA", "false");
+        System.out.println("Created new config file. Please enter your information here properly and change the field eula to \"true\"");
+
+    }
+
+    public static Config getInstance() {
+        return conf;
+    }
+
+
+    public void deleteConfig() {
+        if (new File(filePath).delete()) System.out.println("Deleted your config file under \"" + filePath + "\"");
+    }
 }

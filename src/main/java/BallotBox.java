@@ -14,25 +14,26 @@ public class BallotBox {
     BallotBox() {
         ballots = new HashMap<String, ArrayList<String>>();
 
-        System.out.println("Created BallotBox");
+        System.out.println("Created BallotBox");        //TODO DEBUG
     }
 
     /**
      * Searches the ballots for the combination of user and vote category.
      *
-     * @param user User who voted for a category
+     * @param user     User who voted for a category
      * @param voteType Kind of vote the user voted for
      * @return True, if the voted for the category
      */
     public boolean contains(String user, String voteType) {
-        return !ballots.isEmpty() && ballots.get(voteType).contains(user);
+        if (!ballots.isEmpty()) if (ballots.containsKey(voteType)) return ballots.get(voteType).contains(user);
+        return false;
     }
 
     /**
      * Adds the combination of user and vote to the table of ballots. Does not look for duplicates.
      *
      * @param voteType Type of vote
-     * @param user User who voted
+     * @param user     User who voted
      */
     public void castVoteFor(String voteType, String user) {
 
@@ -40,10 +41,9 @@ public class BallotBox {
             ArrayList<String> temp = new ArrayList<String>();
             temp.add(user);
             ballots.put(voteType, temp);
-        } else
-            ballots.get(voteType).add(user);
+        } else ballots.get(voteType).add(user);
 
-        System.out.println("Added user " + user + " to list");            //DEBUG
+        System.out.println("Added user " + user + " to list");            //TODO DEBUG
     }
 
     /**

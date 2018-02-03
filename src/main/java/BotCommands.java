@@ -20,7 +20,8 @@ public final class BotCommands {
         list.put("!resume", "Vote to resume paused music");
         list.put("!list", "shows a list of all the commands available");
 
-        //TODO castVoteFor missing commands or implement different solution for initialization of commands
+        //TODO add missing commands or implement different solution for initialization of commands
+        //TODO implements aliases
     }
 
 

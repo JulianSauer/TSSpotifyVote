@@ -1,7 +1,8 @@
 public enum CredentialsHolder {
-    IP("192.168.0.164"),
+    IP(""),
     USERNAME("VoteBot"),
-    PASSWORD("elFUF6Vq");
+    BOTNAME("Music Bot"),
+    PASSWORD("");
 
     private final String value;
 
