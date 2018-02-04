@@ -22,9 +22,10 @@ public class NextCommand extends BotCommand {
 
         int userCount = getUserCount(voteListener.getMusicBot());
         if (!ballotBox.contains(client, commandNames[0])) {
-            api.sendChannelMessage(ballotBox.countVotesFor(commandNames[0]) + 1 + "/" + (int) Math.ceil(((float) userCount) / 2) + " Users have voted for \"" + commandNames[0] + "\"");
             if (ballotBox.castVoteFor(commandNames[0], client, userCount))
                 spotify.nextSong(client);
+            api.sendChannelMessage(ballotBox.countVotesFor(commandNames[0]) + 1 + "/" + (int) Math.ceil(((float) userCount) / 2) + " Users have voted for \"" + commandNames[0] + "\"");
+
 
         } else
             api.sendChannelMessage("Can't vote twice!");
