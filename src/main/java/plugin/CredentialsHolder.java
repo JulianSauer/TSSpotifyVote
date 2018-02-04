@@ -4,7 +4,9 @@ public enum CredentialsHolder {
     IP(""),
     USERNAME(""),
     PASSWORD(""),
-    SPOTIFY_TOKEN("");
+    SPOTIFY_TOKEN(""),
+    CLIENT_ID(""),
+    CLIENT_SECRET("");
 
     private final String value;
 
