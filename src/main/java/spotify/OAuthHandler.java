@@ -13,14 +13,12 @@ import java.net.URI;
 
 public class OAuthHandler {
 
-    private final String scope = "user-read-playback-state";
+    private final String scope = "user-read-playback-state," +
+            "user-modify-playback-state";
 
     private final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8888/callback");
 
-    private String clientId;
-    private String clientSecret;
-
-    private SpotifyApi spotifyApi;
+    protected SpotifyApi spotifyApi;
 
     public OAuthHandler() {
         Config config = Config.getInstance();

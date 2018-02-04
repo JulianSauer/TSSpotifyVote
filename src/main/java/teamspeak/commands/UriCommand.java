@@ -1,5 +1,6 @@
 package teamspeak.commands;
 
+import spotify.OAuthHandler;
 import spotify.Spotify;
 import teamspeak.VoteListener;
 
@@ -16,7 +17,7 @@ public class UriCommand extends BotCommand {
 
     @Override
     public void execute(String parameters, int client) {
-        api.sendChannelMessage("Authorization link: " + spotify.getAuthorizationCodeUri());
+        api.sendChannelMessage("Authorization link: " + new OAuthHandler().getAuthorizationCodeUri());
         api.sendChannelMessage("Please enter the authorization code using !code");
     }
 
