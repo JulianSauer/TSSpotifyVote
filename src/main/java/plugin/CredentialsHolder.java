@@ -2,11 +2,12 @@ package plugin;
 
 public enum CredentialsHolder {
     IP(""),
-    USERNAME(""),
-    PASSWORD(""),
     SPOTIFY_TOKEN(""),
     CLIENT_ID(""),
-    CLIENT_SECRET("");
+    CLIENT_SECRET(""),
+    USERNAME("VoteBot"),
+    BOTNAME("Music Bot"),
+    PASSWORD("");
 
     private final String value;
 
