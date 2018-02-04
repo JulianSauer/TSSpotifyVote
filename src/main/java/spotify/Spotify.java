@@ -27,4 +27,20 @@ public class Spotify extends OAuthHandler {
         return true;
     }
 
+    public void nextSong() {
+
+    }
+
+    public void previousSong() {
+
+    }
+
+    public void pauseSong() {
+
+    }
+
+    public void resumeSong() {
+
+    }
+
 }

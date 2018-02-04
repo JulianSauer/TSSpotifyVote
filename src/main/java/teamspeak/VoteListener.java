@@ -9,6 +9,7 @@ import com.github.theholywaffle.teamspeak3.api.event.TextMessageEvent;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import plugin.Config;
 import spotify.Spotify;
+import teamspeak.commands.*;
 
 public class VoteListener extends TS3EventAdapter {
     private final TS3Api api;
@@ -22,6 +23,8 @@ public class VoteListener extends TS3EventAdapter {
 
     private Spotify spotify;
 
+    private BotCommand commands;
+
     public VoteListener(TS3Api api) {
         this.api = api;
         clientId = api.whoAmI().getId();
@@ -31,10 +34,19 @@ public class VoteListener extends TS3EventAdapter {
 
         api.registerAllEvents();
 
+        commands = new BotCommand(this);
+        commands.addCommand(new CodeCommand(this));
+        commands.addCommand(new ListCommand(this));
+        commands.addCommand(new NextCommand(this));
+        commands.addCommand(new PauseCommand(this));
+        commands.addCommand(new PreviousCommand(this));
+        commands.addCommand(new ResumeCommand(this));
+        commands.addCommand(new UriCommand(this));
+
         System.out.println("Searching for " + Config.getInstance().getProperty("BOTNAME"));
-        for (Client c : api.getClients())
-            if (c.getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
-                musicBot = c.getId();
+        for (Client client : api.getClients())
+            if (client.getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
+                musicBot = client.getId();
                 System.out.println("Found you, sneaky little bot");
                 api.moveQuery(api.getClientInfo(musicBot).getChannelId());
                 break;
@@ -72,49 +84,25 @@ public class VoteListener extends TS3EventAdapter {
         if (e.getTargetMode() == TextMessageTargetMode.CHANNEL) {
             String message = e.getMessage();
             String user = e.getInvokerName();
-
-
-            BotCommands commands = new BotCommands();
-
-            if (commands.contain(message)) {
-                System.out.println("found command " + message + " in list");
-                if (message.equals("!list")) {
-                    for (Object com : commands.listCommands()) {
-                        String output = com + ":\t\t" + commands.getDefinition((String) com);
-                        api.sendPrivateMessage(api.getClientsByName(user).get(0).getId(), output);
-                    }
-                } else {
-                    if (!ballotBox.contains(user, message)) ballotBox.castVoteFor(message, user);
-
-                    int mansNotBot = 0;
-                    for (Client c : api.getClients()) {
-                        mansNotBot += !c.isServerQueryClient() && c.getId() != musicBot ? 1 : 0;      //query clients don't count as men
-                    }
-
-                    api.sendChannelMessage(ballotBox.countVotesFor(message) + "/" + (int) Math.ceil(((float) mansNotBot) / 2) + " Users have voted for \"" + message + "\"");
-                    if (ballotBox.countVotesFor(message) == (int) Math.ceil(((float) mansNotBot) / 2)) {         //vote successful (clear voteList?)
-                        botStuff(message);
-                        ballotBox.clear(message);
-                    }
-                }
-            }
+            int client = api.getClientsByName(user).get(0).getId();
+            commands.execute(message, client);
         }
     }
 
-    private void botStuff(String command) {
-        //TODO implement spotify interface
-        System.out.println("Processing: " + command + ". The spotify interface can work from here on");
+    public TS3Api getTS3Api() {
+        return api;
+    }
 
-        if ("!next".equals(command)) {
-            api.sendChannelMessage("Playing that same song");
-        } else if ("!uri".equals(command) || "!auth".equals(command)) {
-            api.sendChannelMessage("Authorization link: " + spotify.getAuthorizationCodeUri());
-            api.sendChannelMessage("Please enter the authorization code using !code");
-        } else if (command.startsWith("!code")) {
-            String code = command.replace("!code ", "");
-            spotify.storeSpotifyUser(code);
-            api.sendChannelMessage("Adding user");
-        }
+    public BallotBox getBallotBox() {
+        return ballotBox;
+    }
+
+    public Spotify getSpotify() {
+        return spotify;
+    }
+
+    public int getMusicBot() {
+        return musicBot;
     }
 
 }

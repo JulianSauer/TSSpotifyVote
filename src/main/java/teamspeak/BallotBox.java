@@ -2,19 +2,20 @@ package teamspeak;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BallotBox {
 
     /**
      * The table that stores the votes and the users who have been added to the vote lists
      */
-    private HashMap<String, ArrayList<String>> ballots;
+    private Map<String, ArrayList<Integer>> ballots;
 
     /**
      * Creates an empty list
      */
     BallotBox() {
-        ballots = new HashMap<String, ArrayList<String>>();
+        ballots = new HashMap<>();
 
         System.out.println("Created BallotBox");        //TODO DEBUG
     }
@@ -22,30 +23,39 @@ public class BallotBox {
     /**
      * Searches the ballots for the combination of user and vote category.
      *
-     * @param user     User who voted for a category
+     * @param client   User who voted for a category
      * @param voteType Kind of vote the user voted for
      * @return True, if the voted for the category
      */
-    public boolean contains(String user, String voteType) {
-        if (!ballots.isEmpty()) if (ballots.containsKey(voteType)) return ballots.get(voteType).contains(user);
+    public boolean contains(int client, String voteType) {
+        if (ballots.containsKey(voteType))
+            return ballots.get(voteType).contains(client);
         return false;
     }
 
     /**
      * Adds the combination of user and vote to the table of ballots. Does not look for duplicates.
      *
-     * @param voteType Type of vote
-     * @param user     User who voted
+     * @param voteType  Type of vote
+     * @param client    User who voted
+     * @param userCount Number of users in channel
+     * @return True if the vote has passed
      */
-    public void castVoteFor(String voteType, String user) {
+    public boolean castVoteFor(String voteType, int client, int userCount) {
 
         if (!ballots.containsKey(voteType)) {
-            ArrayList<String> temp = new ArrayList<String>();
-            temp.add(user);
+            ArrayList<Integer> temp = new ArrayList<>();
+            temp.add(client);
             ballots.put(voteType, temp);
-        } else ballots.get(voteType).add(user);
+        } else
+            ballots.get(voteType).add(client);
 
-        System.out.println("Added user " + user + " to list");            //TODO DEBUG
+        System.out.println("Added user " + client + " to list");            //TODO DEBUG
+        if(countVotesFor(voteType) == (int) Math.ceil(((float) userCount) / 2)) {
+            clear(voteType);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -64,7 +74,7 @@ public class BallotBox {
      * @param voteType Category to list users
      * @return List of all users that have been added to this vote list
      */
-    public ArrayList<String> get(String voteType) {
+    public ArrayList<Integer> get(String voteType) {
         return ballots.get(voteType);
     }
 
