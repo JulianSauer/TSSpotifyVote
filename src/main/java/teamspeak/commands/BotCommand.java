@@ -2,7 +2,6 @@ package teamspeak.commands;
 
 import com.github.theholywaffle.teamspeak3.TS3Api;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
-import teamspeak.BallotBox;
 import teamspeak.VoteListener;
 
 import java.util.HashSet;

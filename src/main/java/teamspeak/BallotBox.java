@@ -51,7 +51,7 @@ public class BallotBox {
             ballots.get(voteType).add(client);
 
         System.out.println("Added user " + client + " to list");            //TODO DEBUG
-        if(countVotesFor(voteType) == (int) Math.ceil(((float) userCount) / 2)) {
+        if (countVotesFor(voteType) == (int) Math.ceil(((float) userCount) / 2)) {
             clear(voteType);
             return true;
         }
