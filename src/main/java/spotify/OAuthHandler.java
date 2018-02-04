@@ -6,7 +6,7 @@ import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
-import plugin.CredentialsHolder;
+import plugin.Config;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,12 +17,16 @@ public class OAuthHandler {
 
     private final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8888/callback");
 
+    private String clientId;
+    private String clientSecret;
+
     private SpotifyApi spotifyApi;
 
     public OAuthHandler() {
+        Config config = Config.getInstance();
         spotifyApi = new SpotifyApi.Builder()
-                .setClientId(CredentialsHolder.CLIENT_ID.toString())
-                .setClientSecret(CredentialsHolder.CLIENT_SECRET.toString())
+                .setClientId(config.getProperty("CLIENT_ID"))
+                .setClientSecret(config.getProperty("CLIENT_SECRET"))
                 .setRedirectUri(redirectUri)
                 .build();
     }
@@ -55,7 +59,7 @@ public class OAuthHandler {
      * @throws IOException
      * @throws SpotifyWebApiException
      */
-    public SpotifyApi getAuthorizationCodeCredentials(String callbackCode) throws IOException, SpotifyWebApiException {
+    protected SpotifyApi getAuthorizationCodeCredentials(String callbackCode) throws IOException, SpotifyWebApiException {
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(callbackCode).build();
         AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
 

@@ -21,6 +21,9 @@ public final class BotCommands {
         list.put("!pause", "Vote to pause the music");
         list.put("!resume", "Vote to resume paused music");
         list.put("!list", "shows a list of all the commands available");
+        list.put("!auth", "Prints authorization uri to grant access");
+        list.put("!uri", "Prints authorization uri to grant access");
+        list.put("!code", "Uses the given code to retrieve access to spotify");
 
         //TODO add missing commands or implement different solution for initialization of commands
         //TODO implements aliases
@@ -32,7 +35,7 @@ public final class BotCommands {
      *
      * @return the list with the commands
      */
-    public Set listCommands() {
+    public Set<String> listCommands() {
         return list.keySet();
     }
 
@@ -44,6 +47,13 @@ public final class BotCommands {
      */
     public String getDefinition(String command) {
         return list.get(command);
+    }
+
+    public boolean contain(String message) {
+        for(String command : list.keySet())
+            if (message.startsWith(command))
+                return true;
+        return false;
     }
 
 }

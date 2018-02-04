@@ -8,6 +8,7 @@ import com.github.theholywaffle.teamspeak3.api.event.TS3EventAdapter;
 import com.github.theholywaffle.teamspeak3.api.event.TextMessageEvent;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import plugin.Config;
+import spotify.Spotify;
 
 public class VoteListener extends TS3EventAdapter {
     private final TS3Api api;
@@ -19,14 +20,18 @@ public class VoteListener extends TS3EventAdapter {
      */
     private BallotBox ballotBox;
 
+    private Spotify spotify;
+
     public VoteListener(TS3Api api) {
         this.api = api;
         clientId = api.whoAmI().getId();
 
         ballotBox = new BallotBox();
+        spotify = new Spotify();
 
         api.registerAllEvents();
 
+        System.out.println("Searching for " + Config.getInstance().getProperty("BOTNAME"));
         for (Client c : api.getClients())
             if (c.getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
                 musicBot = c.getId();
@@ -65,13 +70,13 @@ public class VoteListener extends TS3EventAdapter {
         // if client permissions are sufficient, the bot can receive private messages and process them as public server messages
         // the bot is treated as a query client, so it is invisible in the channel list, unless you check the box "show ServerQuery Clients" in the favorites windows
         if (e.getTargetMode() == TextMessageTargetMode.CHANNEL) {
-            String message = e.getMessage().toLowerCase();
+            String message = e.getMessage();
             String user = e.getInvokerName();
 
 
             BotCommands commands = new BotCommands();
 
-            if (commands.listCommands().contains(message)) {
+            if (commands.contain(message)) {
                 System.out.println("found command " + message + " in list");
                 if (message.equals("!list")) {
                     for (Object com : commands.listCommands()) {
@@ -100,10 +105,15 @@ public class VoteListener extends TS3EventAdapter {
         //TODO implement spotify interface
         System.out.println("Processing: " + command + ". The spotify interface can work from here on");
 
-        switch (command) {
-            case "!next":
-                api.sendChannelMessage("Playing that same song");
-                break;
+        if ("!next".equals(command)) {
+            api.sendChannelMessage("Playing that same song");
+        } else if ("!uri".equals(command) || "!auth".equals(command)) {
+            api.sendChannelMessage("Authorization link: " + spotify.getAuthorizationCodeUri());
+            api.sendChannelMessage("Please enter the authorization code using !code");
+        } else if (command.startsWith("!code")) {
+            String code = command.replace("!code ", "");
+            spotify.storeSpotifyUser(code);
+            api.sendChannelMessage("Adding user");
         }
     }
 

@@ -1,28 +1,30 @@
 package spotify;
 
-import plugin.CredentialsHolder;
+import com.wrapper.spotify.SpotifyApi;
+import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Spotify extends RESTfulService {
+public class Spotify extends OAuthHandler {
 
-    public int nextSong() throws IOException {
-        return post("https://api.spotify.com/v1/me/player/next");
+    // <TS Client ID, Token>
+    private Map<Integer, SpotifyApi> spotifyAccounts;
+
+    public Spotify() {
+        spotifyAccounts = new HashMap();
     }
 
-    public int previousSong() throws IOException {
-        return post("https://api.spotify.com/v1/me/player/previous");
-    }
-
-    public String currentSong() throws IOException {
-        return get("https://api.spotify.com/v1/me/player");
-    }
-
-    private int post(String url) throws IOException {
-        int responseCode = post(url, CredentialsHolder.SPOTIFY_TOKEN.toString());
-        System.out.println("Response Code : " + responseCode);
-        System.out.println("URL: " + url);
-        return responseCode;
+    public boolean storeSpotifyUser(String code) {
+        int tsUser = 0;
+        try {
+            spotifyAccounts.put(tsUser, getAuthorizationCodeCredentials(code));
+        } catch (IOException | SpotifyWebApiException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
 }
