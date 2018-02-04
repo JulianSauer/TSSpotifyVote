@@ -16,8 +16,7 @@ public class Spotify extends OAuthHandler {
         spotifyAccounts = new HashMap();
     }
 
-    public boolean storeSpotifyUser(String code) {
-        int tsUser = 0;
+    public boolean storeSpotifyUser(String code, int tsUser) {
         try {
             spotifyAccounts.put(tsUser, getAuthorizationCodeCredentials(code));
         } catch (IOException | SpotifyWebApiException e) {
@@ -27,20 +26,25 @@ public class Spotify extends OAuthHandler {
         return true;
     }
 
-    public void nextSong() {
-
+    public void nextSong(int tsUser) {
+        System.out.println("Next song for Spotify account of " + tsUser);
     }
 
-    public void previousSong() {
-
+    public void previousSong(int tsUser) {
+        System.out.println("Previous song for Spotify account of " + tsUser);
     }
 
-    public void pauseSong() {
-
+    public void pauseSong(int tsUser) {
+        System.out.println("Pause song for Spotify account of " + tsUser);
     }
 
-    public void resumeSong() {
+    public void resumeSong(int tsUser) {
+        System.out.println("Resume song for Spotify account of " + tsUser);
+    }
 
+    public String getCurrentSong(int tsUser) {
+        System.out.println("Current song for Spotify account of " + tsUser);
+        return "idk";
     }
 
 }
