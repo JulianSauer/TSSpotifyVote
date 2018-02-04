@@ -21,7 +21,7 @@ public class Main {
 
         Config conf = Config.getInstance();
 
-        if (conf.getProperty("eula").equals("false")) {
+        if (conf.getProperty("EULA").equals("false")) {
             System.out.println("You have not excepted the eula. Please open your config file under <filepath> and change the line eula=false to eula=true");
         }
 
