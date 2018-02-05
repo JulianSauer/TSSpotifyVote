@@ -1,5 +1,6 @@
 package teamspeak.commands;
 
+import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import spotify.Spotify;
 import teamspeak.VoteListener;
 
@@ -15,8 +16,8 @@ public class CodeCommand extends BotCommand {
     }
 
     @Override
-    public void execute(String parameters, int client) {
-        spotify.storeSpotifyUser(parameters, client);
+    public void execute(String parameters, Client client) {
+        spotify.storeSpotifyUser(parameters, client.getUniqueIdentifier());
         api.sendChannelMessage("Adding user");
     }
 

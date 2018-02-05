@@ -14,7 +14,7 @@ import teamspeak.commands.*;
 public class VoteListener extends TS3EventAdapter {
     private final TS3Api api;
     private final int clientId;
-    private int musicBot;
+    private Client musicBot;
 
     /**
      * Stores votes of the users
@@ -46,13 +46,15 @@ public class VoteListener extends TS3EventAdapter {
         System.out.println("Searching for " + Config.getInstance().getProperty("BOTNAME"));
         for (Client client : api.getClients())
             if (client.getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
-                musicBot = client.getId();
+                musicBot = client;
                 System.out.println("Found you, sneaky little bot");
-                api.moveQuery(api.getClientInfo(musicBot).getChannelId());
+                if (spotify.loadUser(client.getUniqueIdentifier()))
+                    api.sendChannelMessage("Voting enabled for " + client.getNickname());
+                api.moveQuery(musicBot.getChannelId());
                 break;
             }
 
-        if (musicBot == 0) {
+        if (musicBot == null) {
             System.out.println("Could not find your music bot, maybe it is not online yet?");
             System.out.println("Waiting for your music bot to get online...");
         } else System.out.println("Client is now initialized and ready to use");
@@ -63,8 +65,8 @@ public class VoteListener extends TS3EventAdapter {
     public void onClientJoin(ClientJoinEvent e) {
         if (api.getClientInfo(clientId).getChannelId() != api.getClientInfo(e.getClientId()).getChannelId())
             if (api.getClientInfo(e.getClientId()).getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
-                musicBot = e.getClientId();
-                api.moveQuery(api.getClientInfo(musicBot).getChannelId());
+                musicBot = api.getClientByUId(e.getUniqueClientIdentifier());
+                api.moveQuery(musicBot.getChannelId());
                 System.out.println("Client is now initialized and ready to use");
             }
     }
@@ -84,7 +86,7 @@ public class VoteListener extends TS3EventAdapter {
         if (e.getTargetMode() == TextMessageTargetMode.CHANNEL) {
             String message = e.getMessage();
             String user = e.getInvokerName();
-            int client = api.getClientsByName(user).get(0).getId();
+            Client client = api.getClientsByName(user).get(0);
             commands.execute(message, client);
         }
     }
@@ -101,7 +103,7 @@ public class VoteListener extends TS3EventAdapter {
         return spotify;
     }
 
-    public int getMusicBot() {
+    public Client getMusicBot() {
         return musicBot;
     }
 

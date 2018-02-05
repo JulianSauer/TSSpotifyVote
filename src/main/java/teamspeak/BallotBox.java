@@ -9,7 +9,7 @@ public class BallotBox {
     /**
      * The table that stores the votes and the users who have been added to the vote lists
      */
-    private Map<String, ArrayList<Integer>> ballots;
+    private Map<String, ArrayList<String>> ballots;
 
     /**
      * Creates an empty list
@@ -27,7 +27,7 @@ public class BallotBox {
      * @param voteType Kind of vote the user voted for
      * @return True, if the voted for the category
      */
-    public boolean contains(int client, String voteType) {
+    public boolean contains(String client, String voteType) {
         if (ballots.containsKey(voteType))
             return ballots.get(voteType).contains(client);
         return false;
@@ -41,10 +41,10 @@ public class BallotBox {
      * @param userCount Number of users in channel
      * @return True if the vote has passed
      */
-    public boolean castVoteFor(String voteType, int client, int userCount) {
+    public boolean castVoteFor(String voteType, String client, int userCount) {
 
         if (!ballots.containsKey(voteType)) {
-            ArrayList<Integer> temp = new ArrayList<>();
+            ArrayList<String> temp = new ArrayList<>();
             temp.add(client);
             ballots.put(voteType, temp);
         } else
@@ -74,7 +74,7 @@ public class BallotBox {
      * @param voteType Category to list users
      * @return List of all users that have been added to this vote list
      */
-    public ArrayList<Integer> get(String voteType) {
+    public ArrayList<String> get(String voteType) {
         return ballots.get(voteType);
     }
 

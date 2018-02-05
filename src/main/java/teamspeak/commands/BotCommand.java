@@ -60,7 +60,7 @@ public class BotCommand {
         return false;
     }
 
-    public void execute(String message, int client) {
+    public void execute(String message, Client client) {
         for (BotCommand botCommand : commands) {
             for (String alias : botCommand.getCommandNames()) {
                 if (message.startsWith(alias)) {
@@ -73,10 +73,10 @@ public class BotCommand {
 
     }
 
-    public int getUserCount(int musicBot) {
+    public int getUserCount(Client musicBot) {
         int botCount = 0;
         for (Client client : api.getClients()) {
-            if (!client.isServerQueryClient() && client.getId() != musicBot) //query clients don't count as men
+            if (!client.isServerQueryClient() && client.getId() != musicBot.getId()) //query clients don't count as men
                 botCount++;
         }
         return botCount;

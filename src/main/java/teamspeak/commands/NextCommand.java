@@ -1,5 +1,6 @@
 package teamspeak.commands;
 
+import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import spotify.Spotify;
 import teamspeak.BallotBox;
 import teamspeak.VoteListener;
@@ -18,12 +19,12 @@ public class NextCommand extends BotCommand {
     }
 
     @Override
-    public void execute(String parameters, int client) {
+    public void execute(String parameters, Client client) {
 
         int userCount = getUserCount(voteListener.getMusicBot());
-        if (!ballotBox.contains(client, commandNames[0])) {
-            if (ballotBox.castVoteFor(commandNames[0], client, userCount))
-                spotify.nextSong(voteListener.getMusicBot());
+        if (!ballotBox.contains(client.getUniqueIdentifier(), commandNames[0])) {
+            if (ballotBox.castVoteFor(commandNames[0], client.getUniqueIdentifier(), userCount))
+                spotify.nextSong(voteListener.getMusicBot().getUniqueIdentifier());
             api.sendChannelMessage(ballotBox.countVotesFor(commandNames[0]) + 1 + "/" + (int) Math.ceil(((float) userCount) / 2) + " Users have voted for \"" + commandNames[0] + "\"");
 
         } else

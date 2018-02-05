@@ -1,5 +1,6 @@
 package teamspeak.commands;
 
+import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import teamspeak.VoteListener;
 
 public class ResumeCommand extends BotCommand {
@@ -11,7 +12,7 @@ public class ResumeCommand extends BotCommand {
     }
 
     @Override
-    public void execute(String parameters, int client) {
+    public void execute(String parameters, Client client) {
         api.sendChannelMessage(description);
     }
 

@@ -44,6 +44,9 @@ public class Config {
         return config.getProperty(key);
     }
 
+    public void setProperty(String key, String value) {
+        config.setProperty(key, value);
+    }
 
     public void createConfig() {
 
