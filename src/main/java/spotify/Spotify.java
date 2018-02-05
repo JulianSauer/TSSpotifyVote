@@ -2,7 +2,10 @@ package spotify;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
+import com.wrapper.spotify.model_objects.specification.ArtistSimplified;
+import com.wrapper.spotify.model_objects.specification.Track;
 import com.wrapper.spotify.requests.data.player.*;
 import plugin.Config;
 
@@ -141,8 +144,37 @@ public class Spotify {
     }
 
     public String getCurrentSong(String tsUser) {
-        System.out.println("Current song for Spotify account of " + tsUser);
-        return "idk";
+
+        if (!spotifyAccounts.containsKey(tsUser))
+            return "I have no clue";
+
+        GetInformationAboutUsersCurrentPlaybackRequest getInformationAboutUsersCurrentPlaybackRequest = spotifyAccounts.get(tsUser)
+                .getInformationAboutUsersCurrentPlayback()
+                .build();
+
+        try {
+            CurrentlyPlayingContext result = getInformationAboutUsersCurrentPlaybackRequest.execute();
+
+            Track track = result.getItem();
+            ArtistSimplified[] artists = track.getArtists();
+            StringBuilder songInformation = new StringBuilder();
+
+            for (int i = 0; i < artists.length; i++) {
+                if (i == artists.length - 1)
+                    songInformation.append(artists[i].getName() + " - ");
+                else
+                    songInformation.append(artists[i].getName() + ", ");
+            }
+
+            songInformation.append(track.getName());
+            return songInformation.toString();
+
+        } catch (IOException | SpotifyWebApiException e) {
+            e.printStackTrace();
+        }
+
+        return "I have no clue";
+
     }
 
     private String getDeviceId(String tsUser) {

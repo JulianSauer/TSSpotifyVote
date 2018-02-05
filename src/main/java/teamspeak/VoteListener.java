@@ -36,6 +36,7 @@ public class VoteListener extends TS3EventAdapter {
 
         commands = new BotCommand(this);
         commands.addCommand(new CodeCommand(this));
+        commands.addCommand(new InfoCommand(this));
         commands.addCommand(new ListCommand(this));
         commands.addCommand(new NextCommand(this));
         commands.addCommand(new PauseCommand(this));
