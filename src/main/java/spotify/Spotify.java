@@ -3,8 +3,7 @@ package spotify;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
-import com.wrapper.spotify.requests.data.player.GetUsersAvailableDevicesRequest;
-import com.wrapper.spotify.requests.data.player.SkipUsersPlaybackToNextTrackRequest;
+import com.wrapper.spotify.requests.data.player.*;
 import plugin.Config;
 
 import java.io.IOException;
@@ -79,16 +78,66 @@ public class Spotify {
 
     }
 
-    public void previousSong(String tsUser) {
-        System.out.println("Previous song for Spotify account of " + tsUser);
+    public boolean previousSong(String tsUser) {
+
+        if (!spotifyAccounts.containsKey(tsUser))
+            return false;
+
+        SkipUsersPlaybackToPreviousTrackRequest skipUsersPlaybackToPreviousTrackRequest = spotifyAccounts.get(tsUser)
+                .skipUsersPlaybackToPreviousTrack()
+                .device_id(getDeviceId(tsUser))
+                .build();
+
+        try {
+            String result = skipUsersPlaybackToPreviousTrackRequest.execute();
+            System.out.println(result);
+        } catch (IOException | SpotifyWebApiException e) {
+            e.printStackTrace();
+        }
+
+        return true;
     }
 
-    public void pauseSong(String tsUser) {
-        System.out.println("Pause song for Spotify account of " + tsUser);
+    public boolean pauseSong(String tsUser) {
+
+        if (!spotifyAccounts.containsKey(tsUser))
+            return false;
+
+        PauseUsersPlaybackRequest pauseUsersPlaybackRequest = spotifyAccounts.get(tsUser)
+                .pauseUsersPlayback()
+                .device_id(getDeviceId(tsUser))
+                .build();
+
+        try {
+            String result = pauseUsersPlaybackRequest.execute();
+            System.out.println(result);
+        } catch (IOException | SpotifyWebApiException e) {
+            e.printStackTrace();
+        }
+
+        return true;
+
     }
 
-    public void resumeSong(String tsUser) {
-        System.out.println("Resume song for Spotify account of " + tsUser);
+    public boolean resumeSong(String tsUser) {
+
+        if (!spotifyAccounts.containsKey(tsUser))
+            return false;
+
+        StartResumeUsersPlaybackRequest startResumeUsersPlaybackRequest = spotifyAccounts.get(tsUser)
+                .startResumeUsersPlayback()
+                .device_id(getDeviceId(tsUser))
+                .build();
+
+        try {
+            String result = startResumeUsersPlaybackRequest.execute();
+            System.out.println(result);
+        } catch (IOException | SpotifyWebApiException e) {
+            e.printStackTrace();
+        }
+
+        return true;
+
     }
 
     public String getCurrentSong(String tsUser) {
