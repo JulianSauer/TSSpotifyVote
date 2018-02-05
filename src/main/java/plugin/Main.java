@@ -16,6 +16,7 @@ public class Main {
         config.setHost(Config.getInstance().getProperty("IP"));
 
         final TS3Query query = new TS3Query(config);
+        System.out.println("Connecting...");
         query.connect();
         // TODO implement use of config file and some sort of user confirmation (like "EULA" in minecraft config
 
