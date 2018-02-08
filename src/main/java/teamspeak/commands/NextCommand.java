@@ -24,7 +24,7 @@ public class NextCommand extends BotCommand {
         int userCount = getUserCount(voteListener.getMusicBot());
         if (!ballotBox.contains(client.getUniqueIdentifier(), commandNames[0])) {
             if (ballotBox.castVoteFor(commandNames[0], client.getUniqueIdentifier(), userCount))
-                spotify.nextSong(voteListener.getMusicBot().getUniqueIdentifier());
+                spotify.nextSong(voteListener.getMusicBot());
             api.sendChannelMessage(ballotBox.countVotesFor(commandNames[0]) + 1 + "/" + (int) Math.ceil(((float) userCount) / 2) + " Users have voted for \"" + commandNames[0] + "\"");
 
         } else

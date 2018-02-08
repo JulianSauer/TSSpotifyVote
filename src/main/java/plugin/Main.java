@@ -18,13 +18,6 @@ public class Main {
         final TS3Query query = new TS3Query(config);
         System.out.println("Connecting...");
         query.connect();
-        // TODO implement use of config file and some sort of user confirmation (like "EULA" in minecraft config
-
-        Config conf = Config.getInstance();
-
-        if (conf.getProperty("EULA").equals("false")) {
-            System.out.println("You have not excepted the eula. Please open your config file under <filepath> and change the line eula=false to eula=true");
-        }
 
         final TS3Api api = query.getApi();
         api.login(Config.getInstance().getProperty("USERNAME"), Config.getInstance().getProperty("PASSWORD"));

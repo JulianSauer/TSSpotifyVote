@@ -1,5 +1,6 @@
 package spotify;
 
+import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
@@ -14,6 +15,8 @@ import com.wrapper.spotify.requests.authorization.authorization_code.Authorizati
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.player.*;
 import plugin.Config;
+import teamspeak.DescriptionUpdater;
+import teamspeak.VoteListener;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Spotify {
+
+    private final int UPDATE_DELAY = 2000;
 
     // <TS Client ID, Token>
     private Map<String, SpotifyApi> spotifyAccounts;
@@ -32,19 +37,23 @@ public class Spotify {
 
     private Config config;
 
-    public Spotify() {
+    private DescriptionUpdater descriptionUpdater;
+
+    public Spotify(VoteListener voteListener) {
         spotifyAccounts = new HashMap<>();
         config = Config.getInstance();
+        descriptionUpdater = new DescriptionUpdater(this, voteListener);
     }
 
-    public boolean storeSpotifyUser(String code, String tsUser) {
+    public boolean storeSpotifyUser(String code, Client musicBot) {
         SpotifyApi api = getAuthorizationCodeCredentials(code);
-        return storeSpotifyUser(tsUser, api);
+        return storeSpotifyUser(musicBot, api);
     }
 
-    public boolean loadUser(String tsUser) {
-        String accessToken = config.getProperty(tsUser + ".AccessToken");
-        String refreshToken = config.getProperty(tsUser + ".RefreshToken");
+    public boolean loadUser(Client musicBot) {
+        String id = musicBot.getUniqueIdentifier();
+        String accessToken = config.getProperty(id + ".AccessToken");
+        String refreshToken = config.getProperty(id + ".RefreshToken");
         if (accessToken == null || refreshToken == null
                 || "".equals(accessToken) || "".equals(refreshToken))
             return false;
@@ -56,26 +65,28 @@ public class Spotify {
 
         spotifyApi.setAccessToken(accessToken);
         spotifyApi.setRefreshToken(refreshToken);
-        spotifyAccounts.put(tsUser, spotifyApi);
+        spotifyAccounts.put(id, spotifyApi);
+        descriptionUpdater.updateScheduleFor(musicBot, 0);
 
         return true;
     }
 
-    public boolean nextSong(String tsUser) {
+    public boolean nextSong(Client musicBot) {
 
-        if (!spotifyAccounts.containsKey(tsUser))
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier()))
             return false;
 
-        SkipUsersPlaybackToNextTrackRequest skipUsersPlaybackToNextTrackRequest = spotifyAccounts.get(tsUser)
+        SkipUsersPlaybackToNextTrackRequest skipUsersPlaybackToNextTrackRequest = spotifyAccounts.get(musicBot.getUniqueIdentifier())
                 .skipUsersPlaybackToNextTrack()
-                .device_id(getDeviceId(tsUser))
+                .device_id(getDeviceId(musicBot))
                 .build();
 
         try {
+            descriptionUpdater.updateScheduleFor(musicBot, UPDATE_DELAY);
             skipUsersPlaybackToNextTrackRequest.execute();
         } catch (UnauthorizedException e) {
-            updateTokens(tsUser);
-            return nextSong(tsUser);
+            updateTokens(musicBot);
+            return nextSong(musicBot);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
             return false;
@@ -85,21 +96,22 @@ public class Spotify {
 
     }
 
-    public boolean previousSong(String tsUser) {
+    public boolean previousSong(Client musicBot) {
 
-        if (!spotifyAccounts.containsKey(tsUser))
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier()))
             return false;
 
-        SkipUsersPlaybackToPreviousTrackRequest skipUsersPlaybackToPreviousTrackRequest = spotifyAccounts.get(tsUser)
+        SkipUsersPlaybackToPreviousTrackRequest skipUsersPlaybackToPreviousTrackRequest = spotifyAccounts.get(musicBot.getUniqueIdentifier())
                 .skipUsersPlaybackToPreviousTrack()
-                .device_id(getDeviceId(tsUser))
+                .device_id(getDeviceId(musicBot))
                 .build();
 
         try {
+            descriptionUpdater.updateScheduleFor(musicBot, UPDATE_DELAY);
             skipUsersPlaybackToPreviousTrackRequest.execute();
         } catch (UnauthorizedException e) {
-            updateTokens(tsUser);
-            return previousSong(tsUser);
+            updateTokens(musicBot);
+            return previousSong(musicBot);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
@@ -107,21 +119,25 @@ public class Spotify {
         return true;
     }
 
-    public boolean pauseSong(String tsUser) {
+    public boolean pauseSong(Client musicBot) {
 
-        if (!spotifyAccounts.containsKey(tsUser))
+        CurrentlyPlayingContext currentContex = getSongContext(musicBot);
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier())
+                || currentContex == null
+                || !currentContex.getIs_playing())
             return false;
 
-        PauseUsersPlaybackRequest pauseUsersPlaybackRequest = spotifyAccounts.get(tsUser)
+        PauseUsersPlaybackRequest pauseUsersPlaybackRequest = spotifyAccounts.get(musicBot.getUniqueIdentifier())
                 .pauseUsersPlayback()
-                .device_id(getDeviceId(tsUser))
+                .device_id(getDeviceId(musicBot))
                 .build();
 
         try {
+            descriptionUpdater.pauseSchedule(musicBot);
             pauseUsersPlaybackRequest.execute();
         } catch (UnauthorizedException e) {
-            updateTokens(tsUser);
-            return pauseSong(tsUser);
+            updateTokens(musicBot);
+            return pauseSong(musicBot);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
@@ -130,21 +146,25 @@ public class Spotify {
 
     }
 
-    public boolean resumeSong(String tsUser) {
+    public boolean resumeSong(Client musicBot) {
 
-        if (!spotifyAccounts.containsKey(tsUser))
+        CurrentlyPlayingContext currentContex = getSongContext(musicBot);
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier())
+                || currentContex == null
+                || currentContex.getIs_playing())
             return false;
 
-        StartResumeUsersPlaybackRequest startResumeUsersPlaybackRequest = spotifyAccounts.get(tsUser)
+        StartResumeUsersPlaybackRequest startResumeUsersPlaybackRequest = spotifyAccounts.get(musicBot.getUniqueIdentifier())
                 .startResumeUsersPlayback()
-                .device_id(getDeviceId(tsUser))
+                .device_id(getDeviceId(musicBot))
                 .build();
 
         try {
+            descriptionUpdater.updateScheduleFor(musicBot, 0);
             startResumeUsersPlaybackRequest.execute();
         } catch (UnauthorizedException e) {
-            updateTokens(tsUser);
-            return resumeSong(tsUser);
+            updateTokens(musicBot);
+            return resumeSong(musicBot);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
@@ -153,49 +173,85 @@ public class Spotify {
 
     }
 
-    public String getCurrentSong(String tsUser) {
-
-        if (!spotifyAccounts.containsKey(tsUser))
+    public String getCurrentSongInfo(Client musicBot) {
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier()))
             return "I have no clue";
 
-        GetInformationAboutUsersCurrentPlaybackRequest getInformationAboutUsersCurrentPlaybackRequest = spotifyAccounts.get(tsUser)
+        CurrentlyPlayingContext context = getSongContext(musicBot);
+        if (context == null)
+            return "I have no clue";
+        Track track = context.getItem();
+
+        ArtistSimplified[] artists = track.getArtists();
+        StringBuilder songInformation = new StringBuilder();
+
+        for (int i = 0; i < artists.length; i++) {
+            if (i == artists.length - 1) {
+                songInformation.append(artists[i].getName());
+                songInformation.append(" - ");
+            } else {
+                songInformation.append(artists[i].getName());
+                songInformation.append(", ");
+            }
+        }
+
+        songInformation.append(track.getName());
+        return songInformation.toString();
+    }
+
+    /**
+     * Returns the time in milliseconds until the current song ends. If no song is being played a default value is returned.
+     *
+     * @param musicBot Reference for Spotify account
+     * @return Remaining time in milliseconds
+     */
+    public int getRemainingMS(Client musicBot) {
+        CurrentlyPlayingContext context = getSongContext(musicBot);
+        if (context == null || !context.getIs_playing())
+            return 20000;
+        Track track = context.getItem();
+        int progress = context.getProgress_ms();
+        int duration = track.getDurationMs();
+        return duration - progress + UPDATE_DELAY;
+    }
+
+    /**
+     * Returns information about current playback.
+     *
+     * @param musicBot Reference for Spotify account
+     * @return Playback information
+     */
+    public CurrentlyPlayingContext getSongContext(Client musicBot) {
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier()))
+            return null;
+
+        GetInformationAboutUsersCurrentPlaybackRequest getInformationAboutUsersCurrentPlaybackRequest = spotifyAccounts.get(musicBot.getUniqueIdentifier())
                 .getInformationAboutUsersCurrentPlayback()
                 .build();
 
         try {
-            CurrentlyPlayingContext result = getInformationAboutUsersCurrentPlaybackRequest.execute();
-
-            Track track = result.getItem();
-            ArtistSimplified[] artists = track.getArtists();
-            StringBuilder songInformation = new StringBuilder();
-
-            for (int i = 0; i < artists.length; i++) {
-                if (i == artists.length - 1)
-                    songInformation.append(artists[i].getName() + " - ");
-                else
-                    songInformation.append(artists[i].getName() + ", ");
-            }
-
-            songInformation.append(track.getName());
-            return songInformation.toString();
-
+            return getInformationAboutUsersCurrentPlaybackRequest.execute();
         } catch (UnauthorizedException e) {
-            updateTokens(tsUser);
-            return getCurrentSong(tsUser);
+            updateTokens(musicBot);
+            return getSongContext(musicBot);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
-
-        return "I have no clue";
-
+        return null;
     }
 
-    private String getDeviceId(String tsUser) {
+    /**
+     * Returns currently used device.
+     *
+     * @param musicBot Reference for Spotify account
+     * @return Device ID
+     */
+    private String getDeviceId(Client musicBot) {
 
-        if (!spotifyAccounts.containsKey(tsUser))
+        if (!spotifyAccounts.containsKey(musicBot.getUniqueIdentifier()))
             return "";
 
-        GetUsersAvailableDevicesRequest getUsersAvailableDevicesRequest = spotifyAccounts.get(tsUser)
+        GetUsersAvailableDevicesRequest getUsersAvailableDevicesRequest = spotifyAccounts.get(musicBot.getUniqueIdentifier())
                 .getUsersAvailableDevices()
                 .build();
         try {
@@ -204,8 +260,8 @@ public class Spotify {
                 if (device.getIs_active())
                     return device.getId();
         } catch (UnauthorizedException e) {
-            updateTokens(tsUser);
-            return getDeviceId(tsUser);
+            updateTokens(musicBot);
+            return getDeviceId(musicBot);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
@@ -260,11 +316,12 @@ public class Spotify {
         return spotifyApi;
     }
 
-    private boolean updateTokens(String tsUser) {
-        if (!spotifyAccounts.containsKey(tsUser))
+    private boolean updateTokens(Client musicBot) {
+        String id = musicBot.getUniqueIdentifier();
+        if (!spotifyAccounts.containsKey(id))
             return false;
 
-        SpotifyApi spotifyApi = spotifyAccounts.get(tsUser);
+        SpotifyApi spotifyApi = spotifyAccounts.get(id);
         AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = spotifyApi
                 .authorizationCodeRefresh()
                 .build();
@@ -272,7 +329,7 @@ public class Spotify {
             AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
             spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-            return storeSpotifyUser(tsUser, spotifyApi);
+            return storeSpotifyUser(musicBot, spotifyApi);
         } catch (IOException | SpotifyWebApiException e) {
             e.printStackTrace();
         }
@@ -280,12 +337,13 @@ public class Spotify {
         return false;
     }
 
-    private boolean storeSpotifyUser(String tsUser, SpotifyApi api) {
+    private boolean storeSpotifyUser(Client musicBot, SpotifyApi api) {
         if (api == null)
             return false;
-        spotifyAccounts.put(tsUser, api);
-        config.setProperty(tsUser + ".AccessToken", api.getAccessToken());
-        config.setProperty(tsUser + ".RefreshToken", api.getRefreshToken());
+        String id = musicBot.getUniqueIdentifier();
+        spotifyAccounts.put(id, api);
+        config.setProperty(id + ".AccessToken", api.getAccessToken());
+        config.setProperty(id + ".RefreshToken", api.getRefreshToken());
         config.saveConfig();
         return true;
     }

@@ -17,7 +17,7 @@ public class PreviousCommand extends BotCommand {
 
     @Override
     public void execute(String parameters, Client client) {
-        spotify.previousSong(voteListener.getMusicBot().getUniqueIdentifier());
+        spotify.previousSong(voteListener.getMusicBot());
     }
 
 }

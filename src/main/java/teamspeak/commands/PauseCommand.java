@@ -17,7 +17,7 @@ public class PauseCommand extends BotCommand {
 
     @Override
     public void execute(String parameters, Client client) {
-        spotify.pauseSong(voteListener.getMusicBot().getUniqueIdentifier());
+        spotify.pauseSong(voteListener.getMusicBot());
     }
 
 }

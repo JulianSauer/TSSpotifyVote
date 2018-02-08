@@ -17,7 +17,7 @@ public class InfoCommand extends BotCommand {
 
     @Override
     public void execute(String parameters, Client client) {
-        api.sendChannelMessage(spotify.getCurrentSong(voteListener.getMusicBot().getUniqueIdentifier()));
+        api.sendChannelMessage(spotify.getCurrentSongInfo(voteListener.getMusicBot()));
     }
 
 }

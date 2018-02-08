@@ -17,7 +17,7 @@ public class CodeCommand extends BotCommand {
 
     @Override
     public void execute(String parameters, Client client) {
-        spotify.storeSpotifyUser(parameters, client.getUniqueIdentifier());
+        spotify.storeSpotifyUser(parameters, client);
         api.sendChannelMessage("Adding user");
     }
 

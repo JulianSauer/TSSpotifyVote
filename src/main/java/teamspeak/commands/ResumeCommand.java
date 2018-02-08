@@ -17,7 +17,7 @@ public class ResumeCommand extends BotCommand {
 
     @Override
     public void execute(String parameters, Client client) {
-        spotify.resumeSong(voteListener.getMusicBot().getUniqueIdentifier());
+        spotify.resumeSong(voteListener.getMusicBot());
     }
 
 }

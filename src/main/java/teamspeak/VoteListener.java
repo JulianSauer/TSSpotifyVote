@@ -30,7 +30,7 @@ public class VoteListener extends TS3EventAdapter {
         clientId = api.whoAmI().getId();
 
         ballotBox = new BallotBox();
-        spotify = new Spotify();
+        spotify = new Spotify(this);
 
         api.registerAllEvents();
 
@@ -49,7 +49,7 @@ public class VoteListener extends TS3EventAdapter {
             if (client.getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
                 musicBot = client;
                 System.out.println("Found you, sneaky little bot");
-                if (spotify.loadUser(client.getUniqueIdentifier()))
+                if (spotify.loadUser(client))
                     api.sendChannelMessage("Voting enabled for " + client.getNickname());
                 api.moveQuery(musicBot.getChannelId());
                 break;
@@ -59,6 +59,7 @@ public class VoteListener extends TS3EventAdapter {
             System.out.println("Could not find your music bot, maybe it is not online yet?");
             System.out.println("Waiting for your music bot to get online...");
         } else System.out.println("Client is now initialized and ready to use");
+
     }
 
 
