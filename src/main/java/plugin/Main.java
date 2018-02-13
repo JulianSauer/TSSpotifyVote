@@ -8,9 +8,12 @@ import teamspeak.VoteListener;
 
 public class Main {
 
+    public final static boolean DEBUG = false;
+
     public static void main(String[] args) {
 
-        System.out.println("Starting Bot...");
+        if (DEBUG)
+            System.out.println("Starting Bot...");
 
         final TS3Config config = new TS3Config();
         config.setHost(Config.getInstance().getProperty("IP"));

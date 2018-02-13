@@ -18,7 +18,8 @@ public class Config {
 
         if ((new File(filePath)).exists()) {
             try {
-                System.out.println("Trying to read file from \"" + filePath + "\"");
+                if (Main.DEBUG)
+                    System.out.println("Trying to read file from \"" + filePath + "\"");
                 config.load(new FileInputStream(filePath));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -34,7 +35,8 @@ public class Config {
     public void saveConfig() {
         try {
             config.store(new FileOutputStream(filePath), null);
-            System.out.println("Saved config file under \"" + filePath + "\"");
+            if (Main.DEBUG)
+                System.out.println("Saved config file under \"" + filePath + "\"");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -54,8 +56,8 @@ public class Config {
         for (CredentialsHolder c : CredentialsHolder.values()) {
             config.put(c.name(), c.toString());
         }
-        config.put("EULA", "false");
-        System.out.println("Created new config file. Please enter your information here properly and change the field eula to \"true\"");
+        if (Main.DEBUG)
+            System.out.println("Created new config file.");
 
     }
 

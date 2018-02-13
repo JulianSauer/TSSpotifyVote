@@ -1,5 +1,6 @@
 package spotify;
 
+import com.github.theholywaffle.teamspeak3.TS3Api;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
@@ -37,11 +38,14 @@ public class Spotify {
 
     private Config config;
 
+    private final TS3Api ts3Api;
+
     private DescriptionUpdater descriptionUpdater;
 
     public Spotify(VoteListener voteListener) {
         spotifyAccounts = new HashMap<>();
         config = Config.getInstance();
+        ts3Api = voteListener.getTS3Api();
         descriptionUpdater = new DescriptionUpdater(this, voteListener);
     }
 
@@ -342,8 +346,20 @@ public class Spotify {
             return false;
         String id = musicBot.getUniqueIdentifier();
         spotifyAccounts.put(id, api);
-        config.setProperty(id + ".AccessToken", api.getAccessToken());
-        config.setProperty(id + ".RefreshToken", api.getRefreshToken());
+        if (api.getAccessToken() == null) {
+            String error = "Could not obtain new access token. Try updating manually using !auth.";
+            System.err.println(error);
+            ts3Api.sendChannelMessage(musicBot.getChannelId(), error);
+        } else {
+            config.setProperty(id + ".AccessToken", api.getAccessToken());
+        }
+        if (api.getRefreshToken() == null) {
+            String error = "Could not obtain new refresh token. Try updating manually using !auth.";
+            System.err.println(error);
+            ts3Api.sendChannelMessage(musicBot.getChannelId(), error);
+        } else {
+            config.setProperty(id + ".RefreshToken", api.getRefreshToken());
+        }
         config.saveConfig();
         return true;
     }

@@ -1,5 +1,7 @@
 package teamspeak;
 
+import plugin.Main;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,8 @@ public class BallotBox {
     BallotBox() {
         ballots = new HashMap<>();
 
-        System.out.println("Created BallotBox");        //TODO DEBUG
+        if (Main.DEBUG)
+            System.out.println("Created BallotBox");
     }
 
     /**
@@ -50,7 +53,8 @@ public class BallotBox {
         } else
             ballots.get(voteType).add(client);
 
-        System.out.println("Added user " + client + " to list");            //TODO DEBUG
+        if (Main.DEBUG)
+            System.out.println("Added user " + client + " to list");
         if (countVotesFor(voteType) == (int) Math.ceil(((float) userCount) / 2)) {
             clear(voteType);
             return true;

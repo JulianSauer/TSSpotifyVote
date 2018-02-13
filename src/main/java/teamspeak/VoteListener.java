@@ -8,6 +8,7 @@ import com.github.theholywaffle.teamspeak3.api.event.TS3EventAdapter;
 import com.github.theholywaffle.teamspeak3.api.event.TextMessageEvent;
 import com.github.theholywaffle.teamspeak3.api.wrapper.Client;
 import plugin.Config;
+import plugin.Main;
 import spotify.Spotify;
 import teamspeak.commands.*;
 
@@ -77,7 +78,8 @@ public class VoteListener extends TS3EventAdapter {
     public void onClientMoved(ClientMovedEvent e) {
         if (api.getClientInfo(e.getClientId()).getNickname().equals(Config.getInstance().getProperty("BOTNAME"))) {
             api.moveQuery(api.getChannelInfo(e.getTargetChannelId()));
-            System.out.println("Moved after music bot");        //TODO DEBUG
+            if (Main.DEBUG)
+                System.out.println("Moved after music bot");
         }
     }
 
