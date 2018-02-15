@@ -45,8 +45,7 @@ public class DescriptionUpdater {
                 task.cancel(false);
         }
 
-        CurrentlyPlayingContext currentContext = spotify.getSongContext(musicBot);
-        if (newDelay < 0 || currentContext == null || !currentContext.getIs_playing()) {
+        if (newDelay < 0) {
             futureTasks.put(musicBot.getUniqueIdentifier(), null);
             return;
         }
@@ -84,7 +83,11 @@ public class DescriptionUpdater {
             Map<ClientProperty, String> nameProperty = new HashMap<>(1);
             nameProperty.put(ClientProperty.CLIENT_DESCRIPTION, spotify.getCurrentSongInfo(musicBot));
             ts3Api.editClient(musicBot.getId(), nameProperty);
-            updateScheduleFor(musicBot, spotify.getRemainingMS(musicBot));
+            CurrentlyPlayingContext currentContext = spotify.getSongContext(musicBot);
+            if (currentContext == null || !currentContext.getIs_playing())
+                pauseSchedule(musicBot);
+            else
+                updateScheduleFor(musicBot, spotify.getRemainingMS(musicBot));
         }
     }
 
